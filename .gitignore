@@ -1,0 +1,8 @@
+# Backup das imagens originais enviadas — não é usado pela aplicação
+/originais/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
