@@ -4,7 +4,7 @@ Site de agendamento para a Esmalteria Bellas Nail Designer: landing page com gal
 fluxo de agendamento sem necessidade de conta (nome + telefone) e painel administrativo para a dona
 gerenciar serviços, horários de funcionamento e os agendamentos recebidos.
 
-- **Backend:** Django + Django REST Framework + SimpleJWT, SQLite
+- **Backend:** Django + Django REST Framework + SimpleJWT (SQLite local / PostgreSQL em produção)
 - **Frontend:** Next.js (App Router) + TypeScript + Tailwind CSS + Framer Motion
 
 ## Estrutura
@@ -68,3 +68,44 @@ Acesse `http://localhost:3000`. O painel administrativo fica em `http://localhos
 | CRUD `/api/servicos/`              | admin    | Gerenciar serviços                 |
 | CRUD `/api/horarios-funcionamento/`| admin    | Gerenciar horário de funcionamento |
 | CRUD `/api/bloqueios/`             | admin    | Gerenciar folgas/feriados          |
+
+## Deploy (Railway + Vercel)
+
+Repositório: https://github.com/codebyhelys/BellasNailsEsmalteria (monorepo — `backend/` e `frontend/`).
+
+### 1. Backend no Railway
+
+1. Crie um projeto novo no Railway → **Deploy from GitHub repo** → selecione este repositório.
+2. Nas configurações do serviço, defina o **Root Directory** como `backend`.
+3. Clique em **+ New** → **Database** → **PostgreSQL** dentro do mesmo projeto (o Railway injeta a variável `DATABASE_URL` automaticamente no serviço do backend).
+4. Em **Variables** do serviço backend, adicione:
+   ```
+   SECRET_KEY=<gere uma chave nova, ex: python -c "import secrets; print(secrets.token_urlsafe(50))">
+   DEBUG=False
+   ALLOWED_HOSTS=<dominio-que-o-railway-gerar>.up.railway.app
+   CSRF_TRUSTED_ORIGINS=https://<dominio-que-o-railway-gerar>.up.railway.app
+   CORS_ALLOWED_ORIGINS=https://<dominio-que-a-vercel-gerar>.vercel.app
+   SALON_WHATSAPP_NUMBER=5588999756175
+   ```
+   (O domínio do Railway só existe depois do primeiro deploy — pode colocar um valor provisório e ajustar depois.)
+5. O Railway detecta o `Procfile` sozinho: roda `migrate` antes do deploy (processo `release`) e sobe com `gunicorn` (processo `web`).
+6. Depois do primeiro deploy, crie o usuário admin em produção pela aba **Shell** do serviço (ou `railway run`):
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+### 2. Frontend na Vercel
+
+1. **Add New Project** na Vercel → importe o mesmo repositório.
+2. Em **Root Directory**, selecione `frontend`.
+3. Em **Environment Variables**, adicione:
+   ```
+   NEXT_PUBLIC_API_URL=https://<dominio-do-railway>.up.railway.app/api
+   NEXT_PUBLIC_WHATSAPP_NUMBER=5588999756175
+   NEXT_PUBLIC_INSTAGRAM_URL=https://www.instagram.com/bellas.nailsesmalteria/
+   ```
+4. Deploy. A Vercel detecta Next.js automaticamente.
+
+### 3. Fechando o ciclo
+
+Depois que os dois estiverem no ar, volte no Railway e confirme que `CORS_ALLOWED_ORIGINS` e `CSRF_TRUSTED_ORIGINS` apontam para o domínio final da Vercel (com `https://`), e redeploy o backend se precisar ajustar.
