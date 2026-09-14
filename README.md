@@ -27,12 +27,11 @@ python manage.py migrate
 python manage.py runserver 8000
 ```
 
-Um usuário administrador já foi criado para a dona acessar o painel:
+Um usuário administrador já foi criado para a dona acessar o painel. As credenciais foram
+entregues a ela por um canal privado (não ficam no README por segurança).
 
-- **Usuário:** `admin`
-- **Senha:** `BellasNail@2026`
-
-> Recomenda-se trocar essa senha após o primeiro acesso (`python manage.py changepassword admin`).
+> Se você é desenvolvedor(a) clonando este projeto, crie seu próprio usuário de teste com
+> `python manage.py createsuperuser`.
 
 ## Rodando o frontend
 
